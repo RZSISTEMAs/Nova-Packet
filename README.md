@@ -1,4 +1,4 @@
-# Nova-Packet (G-Earth Next-Gen)
+# Nova-Packet
 
 [![Tech Stack](https://img.shields.io/badge/Tech-Node.js_%7C_TypeScript-blue)](https://nodejs.org/)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
