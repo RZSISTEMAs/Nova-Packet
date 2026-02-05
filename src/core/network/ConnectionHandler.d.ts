@@ -3,7 +3,8 @@ export declare class ConnectionHandler {
     private readonly LISTEN_PORT;
     private readonly TARGET_HOST;
     private readonly TARGET_PORT;
-    constructor();
+    private webServer?;
+    constructor(webServer?: any);
     start(): void;
     private handleConnection;
     private closeSockets;

@@ -6,11 +6,12 @@ export class ConnectionHandler {
     private readonly LISTEN_PORT = 9090;
     
     // Configurable Target (Real Game Server)
-    // For now, defaulting to a known static IP or localhost, usually this is configurable
-    private readonly TARGET_HOST = 'game-us.habbo.com'; 
+    private readonly TARGET_HOST = 'game-br.habbo.com'; 
     private readonly TARGET_PORT = 30000;
+    private webServer?: any; // Avoiding circular dependency type issues for now
 
-    constructor() {
+    constructor(webServer?: any) {
+        this.webServer = webServer;
         this.server = net.createServer(this.handleConnection.bind(this));
     }
 
@@ -33,23 +34,25 @@ export class ConnectionHandler {
 
         // Data from Client -> Proxy -> Server
         clientSocket.on('data', (data) => {
-            // Intercept/Log
-            // console.log(`[C->S] ${data.length} bytes`);
-            
             // Forward
             if (!serverSocket.destroyed) {
                 serverSocket.write(data);
+            }
+            // Broadcast to Web UI
+            if (this.webServer) {
+                this.webServer.broadcastPacket('C->S', data.toString('utf-8')); // TODO: Use proper parsing
             }
         });
 
         // Data from Server -> Proxy -> Client
         serverSocket.on('data', (data) => {
-            // Intercept/Log
-            // console.log(`[S->C] ${data.length} bytes`);
-
             // Forward
             if (!clientSocket.destroyed) {
                 clientSocket.write(data);
+            }
+             // Broadcast to Web UI
+             if (this.webServer) {
+                this.webServer.broadcastPacket('S->C', data.toString('utf-8'));
             }
         });
 

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nova-Packet | Dashboard</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Google Fonts for Premium Feel -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <div class="brand">
+          <h1>Nova<span>Packet</span></h1>
+        </div>
+        <nav class="nav-menu">
+          <button class="nav-item active" id="btn-logger">
+            <span class="icon">📡</span> Logger
+          </button>
+          <button class="nav-item" id="btn-injector">
+            <span class="icon">💉</span> Injector
+          </button>
+          <button class="nav-item" id="btn-extensions">
+            <span class="icon">🧩</span> Extensions
+          </button>
+          <button class="nav-item" id="btn-settings">
+            <span class="icon">⚙️</span> Settings
+          </button>
+        </nav>
+        <div class="status-panel">
+          <div class="status-item">
+            <span class="label">Proxy:</span>
+            <span class="value online">ONLINE</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Target:</span>
+            <span class="value">Habbo BR</span>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <header class="top-bar">
+          <h2 id="page-title">Packet Logger</h2>
+          <div class="actions">
+            <button class="btn btn-secondary">Clear</button>
+            <button class="btn btn-primary">Start Log</button>
+          </div>
+        </header>
+
+        <div class="packet-log-container" id="packet-log">
+          <!-- Packets will be injected here via JS -->
+          <div class="packet-entry system">
+            <span class="timestamp">--:--:--</span>
+            <span class="direction">[SYS]</span>
+            <span class="content">Waiting for connection...</span>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
