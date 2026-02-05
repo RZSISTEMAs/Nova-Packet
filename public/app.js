@@ -6,37 +6,62 @@ const wsUrl = `${protocol}//${window.location.host}`;
 const socket = new WebSocket(wsUrl);
 
 socket.onopen = () => {
-    addLog('System', 'Connected to Nova-Packet Engine', 'system');
+    // addLog('SYS', 'System Connected', 'system');
 };
 
 socket.onmessage = (event) => {
     try {
         const msg = JSON.parse(event.data);
-        // msg structure: { timestamp, direction, data }
-        addLog(msg.direction, msg.data, msg.direction === 'C->S' ? 'client' : 'server');
+        // msg structure: { timestamp, direction, data: { header, length, raw, meta: { label, icon } } }
+        
+        const timestamp = msg.timestamp;
+        const dir = msg.direction;
+        const type = dir === 'C->S' ? 'client' : 'server';
+        
+        let header = '-';
+        let length = '-';
+        let raw = '';
+        let icon = '';
+
+        if (typeof msg.data === 'object' && msg.data.raw) {
+             header = msg.data.header;
+             length = msg.data.length;
+             raw = msg.data.raw;
+             if (msg.data.meta) {
+                 icon = msg.data.meta.icon;
+             }
+        } else {
+            raw = msg.data;
+        }
+
+        addRow(timestamp, dir, header, length, icon, raw, type);
+
     } catch (e) {
         console.error('Error parsing packet', e);
     }
 };
 
-socket.onclose = () => {
-    addLog('System', 'Disconnected from Engine', 'system');
-};
-
-function addLog(direction, content, type) {
+function addRow(time, dir, id, len, icon, data, type) {
     const entry = document.createElement('div');
     entry.className = `packet-entry ${type}`;
     
     // Simplistic formatting for now
     entry.innerHTML = `
-        <span class="timestamp">${new Date().toLocaleTimeString()}</span>
-        <span class="direction">${direction}</span>
-        <span class="content">${escapeHtml(content)}</span>
+        <span class="col-time">${time}</span>
+        <span class="col-dir">${dir}</span>
+        <span class="col-id">${id}</span>
+        <span class="col-len">${len}</span>
+        <span class="col-icon">${icon}</span>
+        <span class="col-data" title="${data}">${data}</span>
     `;
 
     logContainer.appendChild(entry);
     
-    // Auto scroll if near bottom
+    // Auto scroll rule (simple)
+    if (logContainer.children.length > 200) {
+        logContainer.removeChild(logContainer.children[1]); // Remove oldest (keep header)
+    }
+    
     logContainer.scrollTop = logContainer.scrollHeight;
 }
 

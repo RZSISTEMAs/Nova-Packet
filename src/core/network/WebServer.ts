@@ -2,6 +2,10 @@ import express from 'express';
 import { WebSocketServer, WebSocket } from 'ws';
 import * as http from 'http';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export class WebServer {
     private app: express.Express;
@@ -20,11 +24,12 @@ export class WebServer {
 
     private configureRoutes(): void {
         // Serve static files from 'public' directory
-        this.app.use(express.static(path.join(__dirname, '../../public')));
+        // Fixed path: src/core/network -> root/public requires 3 levels up
+        this.app.use(express.static(path.join(__dirname, '../../../public')));
         
         // Default route
         this.app.get('/', (req, res) => {
-            res.sendFile(path.join(__dirname, '../../public/index.html'));
+            res.sendFile(path.join(__dirname, '../../../public/index.html'));
         });
     }
 

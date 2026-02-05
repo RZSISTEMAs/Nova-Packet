@@ -55,12 +55,16 @@
         </header>
 
         <div class="packet-log-container" id="packet-log">
-          <!-- Packets will be injected here via JS -->
-          <div class="packet-entry system">
-            <span class="timestamp">--:--:--</span>
-            <span class="direction">[SYS]</span>
-            <span class="content">Waiting for connection...</span>
-          </div>
+            <!-- Header of the Table -->
+            <div class="packet-header-row">
+                <span class="col-time">Time</span>
+                <span class="col-dir">Dir</span>
+                <span class="col-id">ID</span>
+                <span class="col-len">Len</span>
+                <span class="col-icon">Type</span>
+                <span class="col-data">Data</span>
+            </div>
+            <!-- Packets will be injected here via JS -->
         </div>
       </main>
     </div>

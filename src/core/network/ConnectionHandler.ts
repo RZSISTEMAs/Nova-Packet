@@ -1,5 +1,6 @@
 import * as net from 'net';
-import { Packet } from '../packet/Packet';
+import { Packet } from '../packet/Packet.js';
+import { PacketManager } from '../packet/PacketManager.js';
 
 export class ConnectionHandler {
     private server: net.Server;
@@ -8,11 +9,15 @@ export class ConnectionHandler {
     // Configurable Target (Real Game Server)
     private readonly TARGET_HOST = 'game-br.habbo.com'; 
     private readonly TARGET_PORT = 30000;
-    private webServer?: any; // Avoiding circular dependency type issues for now
+    private webServer?: any;
+    private packetManager: PacketManager;
 
     constructor(webServer?: any) {
         this.webServer = webServer;
         this.server = net.createServer(this.handleConnection.bind(this));
+        
+        // Initialize Packet Manager
+        this.packetManager = new PacketManager();
     }
 
     public start(): void {
@@ -33,26 +38,45 @@ export class ConnectionHandler {
         });
 
         // Data from Client -> Proxy -> Server
-        clientSocket.on('data', (data) => {
+        clientSocket.on('data', (data: Buffer) => {
             // Forward
             if (!serverSocket.destroyed) {
                 serverSocket.write(data);
             }
-            // Broadcast to Web UI
-            if (this.webServer) {
-                this.webServer.broadcastPacket('C->S', data.toString('utf-8')); // TODO: Use proper parsing
+            
+            // Try to parse packet for logging
+            const packet = Packet.fromBuffer(data);
+            if (this.webServer && packet) {
+                const metadata = this.packetManager.handle(packet, 'C->S');
+                this.webServer.broadcastPacket('C->S', {
+                    header: packet.getHeader(),
+                    length: data.length,
+                    raw: data.toString('hex'),
+                    meta: metadata 
+                });
+            } else if (this.webServer) {
+                // Raw fallback
+                 this.webServer.broadcastPacket('C->S', { header: 'RAW', length: data.length, raw: data.toString('hex') });
             }
         });
 
         // Data from Server -> Proxy -> Client
-        serverSocket.on('data', (data) => {
+        serverSocket.on('data', (data: Buffer) => {
             // Forward
             if (!clientSocket.destroyed) {
                 clientSocket.write(data);
             }
-             // Broadcast to Web UI
-             if (this.webServer) {
-                this.webServer.broadcastPacket('S->C', data.toString('utf-8'));
+             
+            // Try to parse
+            const packet = Packet.fromBuffer(data);
+             if (this.webServer && packet) {
+                const metadata = this.packetManager.handle(packet, 'S->C');
+                this.webServer.broadcastPacket('S->C', {
+                    header: packet.getHeader(),
+                    length: data.length,
+                    raw: data.toString('hex'),
+                    meta: metadata
+                });
             }
         });
 
